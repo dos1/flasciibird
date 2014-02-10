@@ -8,7 +8,9 @@ __license__     = "GPLv3+"
 
 # So you're looking at the code anyway? OK then, but don't say I didn't warn you...
 
-import curses, time, random
+import curses, time, random, os
+
+os.system('stty sane')
 
 myscreen = curses.initscr()
 

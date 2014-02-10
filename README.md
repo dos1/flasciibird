@@ -10,4 +10,6 @@ Just launch the Python file and you're in game. ESC quits the game, RETURN resta
 
 FlasciiBird running on Ben NanoNote: https://www.youtube.com/watch?v=1FTGFpb1f_0
 
+Tested under GNU/Linux. It might or might not work on other platforms.
+
 Don't look at the code. It's ugly as hell.

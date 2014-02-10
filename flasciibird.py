@@ -1,4 +1,13 @@
 #!/usr/bin/env python2
+
+"""flasciibird.py: ncurses-based port of Flappy Bird."""
+
+__author__      = "Sebastian Krzyszkowiak"
+__copyright__   = "Copyright 2014, Sebastian Krzyszkowiak <dos@dosowisko.net>"
+__license__     = "GPLv3+"
+
+# So you're looking at the code anyway? OK then, but don't say I didn't warn you...
+
 import curses, time, random
 
 myscreen = curses.initscr()
@@ -33,15 +42,6 @@ def createTube():
     tubes.append(tube)
 
 createTube()
-
-birdWin = curses.newwin(4, 7, bird, birdXPos)
-birdWin.addstr(0, 5, "_", curses.color_pair(1))
-birdWin.addstr(1, 0, "\.", curses.color_pair(1))
-birdWin.addstr(1, 3, "_(9>", curses.color_pair(1))
-birdWin.addstr(2, 1, "\==_)", curses.color_pair(1))
-birdWin.addstr(3, 2, "-'=", curses.color_pair(1))
-#birdWin.bkgd(' ', curses.color_pair(2))
-
 
 def drawBird():
     if bird > 0 and bird < maxy:
@@ -78,7 +78,6 @@ def draw(dead = False):
     #myscreen.border(1, 1, 0, 1, 1, 1, 1, 1)
     myscreen.addstr(0, maxx / 2 - 6, "FlasciiBird")
     myscreen.addstr(maxy - 1, maxx / 2 - len(str(score)) / 2 , str(score))
-    #bird[0] = bird[0] + 1
     drawBird()
 
     if dead:
@@ -90,7 +89,6 @@ def draw(dead = False):
         drawTube(tube)
 
     myscreen.noutrefresh()
-    birdWin.noutrefresh()
     for tube in tubes:
         tube['box1'].noutrefresh()
         tube['box2'].noutrefresh()

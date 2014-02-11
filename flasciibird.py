@@ -49,15 +49,14 @@ try:
     def drawBird():
         #global bird
         #bird = tubes[0]['y'] + 4
-        if bird > 0 and bird < maxy:
+        if bird >= 0 and bird < maxy:
             myscreen.addstr(bird, birdXPos+5, "_", curses.color_pair(1))
-        if bird > -1 and bird < maxy - 1:
+        if bird >= -1 and bird < maxy - 1:
             myscreen.addstr(bird+1, birdXPos, "\.", curses.color_pair(1))
-        if bird > -2 and bird < maxy - 2:
             myscreen.addstr(bird+1, birdXPos+3, "_(9>", curses.color_pair(1))
-        if bird > -3 and bird < maxy - 3:
+        if bird >= -2 and bird < maxy - 2:
             myscreen.addstr(bird+2, birdXPos+1, "\==_)", curses.color_pair(1))
-        if bird > -4 and bird < maxy - 4:
+        if bird >= -3 and bird < maxy - 3:
             myscreen.addstr(bird+3, birdXPos+2, "-'=", curses.color_pair(1))
 
 

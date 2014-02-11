@@ -17,8 +17,11 @@ try:
     curses.start_color()
     try:
         curses.use_default_colors()
-        curses.init_pair(1, curses.COLOR_YELLOW, -1)
+        curses.init_pair(1, -1, -1)
         curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_WHITE)
+        curses.init_pair(3, curses.COLOR_YELLOW, -1)
+        curses.init_pair(4, curses.COLOR_RED, -1)
+        curses.init_pair(5, curses.COLOR_GREEN, -1)
         curses.curs_set(0)
     except:
         pass
@@ -41,6 +44,8 @@ try:
         tube['y'] = int((maxy - 11) * random.random()) + 1
         tube['box1'] = curses.newwin(5, 12, 1, 20)
         tube['box2'] = curses.newwin(maxy - (5 + 10), 12, 5 + 10, 20)
+        tube['box1'].bkgd(' ', curses.color_pair(2) | curses.A_REVERSE | curses.A_BOLD)
+        tube['box2'].bkgd(' ', curses.color_pair(2) | curses.A_REVERSE | curses.A_BOLD)
         tube['passed'] = False
         tubes.append(tube)
 
@@ -50,14 +55,21 @@ try:
         #global bird
         #bird = tubes[0]['y'] + 4
         if bird >= 0 and bird < maxy:
-            myscreen.addstr(bird, birdXPos+5, "_", curses.color_pair(1))
+            myscreen.addstr(bird, birdXPos+5, "_", curses.color_pair(4))
         if bird >= -1 and bird < maxy - 1:
-            myscreen.addstr(bird+1, birdXPos, "\.", curses.color_pair(1))
-            myscreen.addstr(bird+1, birdXPos+3, "_(9>", curses.color_pair(1))
+            myscreen.addstr(bird+1, birdXPos, "\\.", curses.color_pair(4))
+            myscreen.addstr(bird+1, birdXPos+3, "_", curses.color_pair(3) | curses.A_BOLD)
+            myscreen.addstr(bird+1, birdXPos+4, "(", curses.color_pair(4))
+            myscreen.addstr(bird+1, birdXPos+5, "9", curses.color_pair(1) | curses.A_BOLD)
+            myscreen.addstr(bird+1, birdXPos+6, ">", curses.color_pair(3))
         if bird >= -2 and bird < maxy - 2:
-            myscreen.addstr(bird+2, birdXPos+1, "\==_)", curses.color_pair(1))
+            myscreen.addstr(bird+2, birdXPos+1, "\\", curses.color_pair(4))
+            myscreen.addstr(bird+2, birdXPos+2, "==", curses.color_pair(5))
+            myscreen.addstr(bird+2, birdXPos+4, "_)", curses.color_pair(3) | curses.A_BOLD)
         if bird >= -3 and bird < maxy - 3:
-            myscreen.addstr(bird+3, birdXPos+2, "-'=", curses.color_pair(1))
+            myscreen.addstr(bird+3, birdXPos+2, "-", curses.color_pair(1))
+            myscreen.addstr(bird+3, birdXPos+3, "'", curses.color_pair(5) | curses.A_BOLD)
+            myscreen.addstr(bird+3, birdXPos+4, "=", curses.color_pair(1))
 
 
     def drawTube(tube):
@@ -69,26 +81,24 @@ try:
         if x > -12:
             box1.resize(y, w)
             box1.mvwin(0, max(0, x - 1))
-            box1.bkgd(curses.A_REVERSE, curses.color_pair(2))
-
             box2.resize(maxy - (y + 7), w)
             box2.mvwin(y + 7, max(0, x - 1))
-            box2.bkgd(curses.A_REVERSE, curses.color_pair(2))
 
     score = 0
 
     def draw(dead = False):
         myscreen.erase()
         #myscreen.border(1, 1, 0, 1, 1, 1, 1, 1)
-        myscreen.addstr(0, maxx // 2 - 6, "FlasciiBird")
-        myscreen.addstr(maxy - 1, maxx // 2 - len(str(score)) // 2 , str(score))
+        myscreen.addstr(0, maxx // 2 - 6, "FlasciiBird", curses.color_pair(1))
+        strscore = "Score: " + str(score)
+        myscreen.addstr(maxy - 1, maxx // 2 - len(strscore) // 2 , strscore, curses.color_pair(1) | curses.A_BOLD)
         drawBird()
 
         if dead:
             lost = "You lost! Score: " + str(score)
             lostWin = curses.newwin(3, len(lost) + 2, maxy // 2 - 1, maxx // 2 - len(lost) // 2 - 2)
             lostWin.border(0)
-            lostWin.addstr(1, 1, lost)
+            lostWin.addstr(1, 1, lost, curses.color_pair(1) | curses.A_BOLD)
         for tube in tubes:
             drawTube(tube)
 

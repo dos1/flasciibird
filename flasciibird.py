@@ -47,6 +47,8 @@ try:
     createTube()
 
     def drawBird():
+        #global bird
+        #bird = tubes[0]['y'] + 4
         if bird > 0 and bird < maxy:
             myscreen.addstr(bird, birdXPos+5, "_", curses.color_pair(1))
         if bird > -1 and bird < maxy - 1:
@@ -98,6 +100,11 @@ try:
         if dead:
             lostWin.noutrefresh()
         curses.doupdate()
+
+    def debugDeath():
+        draw()
+        time.sleep(0.5)
+        return False
 
     def death():
         global score, tubes, bird, oldTime, updateTime, lastFlapTime, flapping, flap, speed
@@ -172,10 +179,10 @@ try:
         if bird > maxy - 4:
             if death():
                 break
-
+	
         if birdXPos - 10 <= tubes[0]['x'] <= birdXPos + 7:
             tol = max(0, tubes[0]['y'] + 8 - (bird + 2))
-            if bird + 1 < tubes[0]['y'] or (bird + 4 >= tubes[0]['y'] + 8 and birdXPos - 11 + tol <= tubes[0]['x'] <= birdXPos + 7 - tol):
+            if bird + 1 < tubes[0]['y'] or (bird + 4 >= tubes[0]['y'] + 8 and birdXPos - 11 + tol < tubes[0]['x'] <= birdXPos + 7 - tol):
                 if death():
                     break
 

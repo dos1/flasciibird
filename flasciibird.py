@@ -30,23 +30,53 @@ try:
 
     myscreen.nodelay(1)
 
-    birdXPos = myscreen.getmaxyx()[1] // 10
+    (maxy, maxx) = myscreen.getmaxyx()
 
-    bird = myscreen.getmaxyx()[0] // 2 - 4
+    birdXPos = maxx // 10
+
+    bird = maxy // 2 - 4
 
     tubes = []
 
-    (maxy, maxx) = myscreen.getmaxyx()
+    class Tube:
+        def __init__(self, x, y):
+            self.x = x
+            self.y = y
+            self.box1 = curses.newwin(5, 12, 1, 20)
+            self.box2 = curses.newwin(maxy - (5 + 10), 12, 5 + 10, 20)
+            self.box1.bkgd(' ', curses.color_pair(2) | curses.A_REVERSE | curses.A_BOLD)
+            self.box2.bkgd(' ', curses.color_pair(2) | curses.A_REVERSE | curses.A_BOLD)
+            self.passed = False
+
+        def getX(self):
+            return self.x
+
+        def getY(self):
+            return self.y
+
+        def draw(self):
+            w = max(1, min(12, 13 - ((self.x + 12) - maxx + 1)) - max(0, -self.x + 1))
+            if self.x > -12:
+                self.box1.resize(self.y, w)
+                self.box1.mvwin(0, max(0, self.x - 1))
+                self.box2.resize(maxy - (self.y + 7), w)
+                self.box2.mvwin(self.y + 7, max(0, self.x - 1))
+
+        def refresh(self):
+            self.box1.noutrefresh()
+            self.box2.noutrefresh()
+
+        def move(self):
+            self.x = self.x - 1
+
+        def getPassed(self):
+           return self.passed
+
+        def setPassed(self):
+           self.passed = True
 
     def createTube():
-        tube = {}
-        tube['x'] = myscreen.getmaxyx()[1]
-        tube['y'] = int((maxy - 11) * random.random()) + 1
-        tube['box1'] = curses.newwin(5, 12, 1, 20)
-        tube['box2'] = curses.newwin(maxy - (5 + 10), 12, 5 + 10, 20)
-        tube['box1'].bkgd(' ', curses.color_pair(2) | curses.A_REVERSE | curses.A_BOLD)
-        tube['box2'].bkgd(' ', curses.color_pair(2) | curses.A_REVERSE | curses.A_BOLD)
-        tube['passed'] = False
+        tube = Tube(maxx, int((maxy - 11) * random.random()) + 1)
         tubes.append(tube)
 
     createTube()
@@ -71,19 +101,6 @@ try:
             myscreen.addstr(bird+3, birdXPos+3, "'", curses.color_pair(5) | curses.A_BOLD)
             myscreen.addstr(bird+3, birdXPos+4, "=", curses.color_pair(1))
 
-
-    def drawTube(tube):
-        x = tube['x']
-        y = tube['y']
-        box1 = tube['box1']
-        box2 = tube['box2']
-        w = max(1, min(12, 13 - ((x + 12) - maxx + 1)) - max(0, -x + 1))
-        if x > -12:
-            box1.resize(y, w)
-            box1.mvwin(0, max(0, x - 1))
-            box2.resize(maxy - (y + 7), w)
-            box2.mvwin(y + 7, max(0, x - 1))
-
     score = 0
 
     def draw(dead = False):
@@ -100,12 +117,11 @@ try:
             lostWin.border(0)
             lostWin.addstr(1, 1, lost, curses.color_pair(1) | curses.A_BOLD)
         for tube in tubes:
-            drawTube(tube)
+            tube.draw()
 
         myscreen.noutrefresh()
         for tube in tubes:
-            tube['box1'].noutrefresh()
-            tube['box2'].noutrefresh()
+            tube.refresh()
         if dead:
             lostWin.noutrefresh()
         curses.doupdate()
@@ -128,7 +144,7 @@ try:
             return True
         score = 0
         tubes = []
-        bird = myscreen.getmaxyx()[0] // 2 - 4
+        bird = maxy // 2 - 4
         oldTime = updateTime = lastFlapTime = time.time()
         createTube()
         flapping = False
@@ -156,16 +172,16 @@ try:
             flap = 4
             lastFlapTime = newTime
             flapping = False
-        if tubes[-1]['x'] < maxx - 1.2*maxy:
+        if tubes[-1].getX() < maxx - 1.2*maxy:
             createTube()
-        if tubes[0]['x'] < (birdXPos - 11) and not tubes[0]['passed']:
+        if tubes[0].getX() < (birdXPos - 11) and not tubes[0].getPassed():
             #curses.beep()
             score = score + 1
-            tubes[0]['passed'] = True
+            tubes[0].setPassed()
         if (newTime - updateTime) > 0.05:
             for tube in tubes:
-                tube['x'] = tube['x'] - 1
-            if tubes[0]['x'] < -10:
+                tube.move()
+            if tubes[0].getX() < -10:
                 tubes.pop(0)
             speed = speed + 1
             if flap:
@@ -189,9 +205,9 @@ try:
             if death():
                 break
 	
-        if birdXPos - 10 <= tubes[0]['x'] <= birdXPos + 7:
-            tol = max(0, tubes[0]['y'] + 8 - (bird + 2))
-            if bird + 1 < tubes[0]['y'] or (bird + 4 >= tubes[0]['y'] + 8 and birdXPos - 11 + tol < tubes[0]['x'] <= birdXPos + 7 - tol):
+        if birdXPos - 10 <= tubes[0].getX() <= birdXPos + 7:
+            tol = max(0, tubes[0].getY() + 8 - (bird + 2))
+            if bird + 1 < tubes[0].getY() or (bird + 4 >= tubes[0].getY() + 8 and birdXPos - 11 + tol < tubes[0].getX() <= birdXPos + 7 - tol):
                 if death():
                     break
 

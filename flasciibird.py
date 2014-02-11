@@ -3,6 +3,7 @@
 """flasciibird.py: ncurses-based port of Flappy Bird."""
 
 __author__      = "Sebastian Krzyszkowiak"
+__version__     = "0.0.2"
 __copyright__   = "Copyright 2014, Sebastian Krzyszkowiak <dos@dosowisko.net>"
 __license__     = "GPLv3+"
 

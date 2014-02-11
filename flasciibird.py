@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 """flasciibird.py: ncurses-based port of Flappy Bird."""
 
@@ -27,9 +27,9 @@ try:
 
     myscreen.nodelay(1)
 
-    birdXPos = myscreen.getmaxyx()[1] / 10
+    birdXPos = myscreen.getmaxyx()[1] // 10
 
-    bird = myscreen.getmaxyx()[0] / 2 - 4
+    bird = myscreen.getmaxyx()[0] // 2 - 4
 
     tubes = []
 
@@ -81,13 +81,13 @@ try:
     def draw(dead = False):
         myscreen.erase()
         #myscreen.border(1, 1, 0, 1, 1, 1, 1, 1)
-        myscreen.addstr(0, maxx / 2 - 6, "FlasciiBird")
-        myscreen.addstr(maxy - 1, maxx / 2 - len(str(score)) / 2 , str(score))
+        myscreen.addstr(0, maxx // 2 - 6, "FlasciiBird")
+        myscreen.addstr(maxy - 1, maxx // 2 - len(str(score)) // 2 , str(score))
         drawBird()
 
         if dead:
             lost = "You lost! Score: " + str(score)
-            lostWin = curses.newwin(3, len(lost) + 2, maxy / 2 - 1, maxx / 2 - len(lost) / 2 - 2)
+            lostWin = curses.newwin(3, len(lost) + 2, maxy // 2 - 1, maxx // 2 - len(lost) // 2 - 2)
             lostWin.border(0)
             lostWin.addstr(1, 1, lost)
         for tube in tubes:
@@ -119,7 +119,7 @@ try:
             return True
         score = 0
         tubes = []
-        bird = myscreen.getmaxyx()[0] / 2 - 4
+        bird = myscreen.getmaxyx()[0] // 2 - 4
         oldTime = updateTime = lastFlapTime = time.time()
         createTube()
         flapping = False

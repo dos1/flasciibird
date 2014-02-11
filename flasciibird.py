@@ -182,7 +182,7 @@ try:
             for tube in tubes:
                 tube.move()
             if tubes[0].getX() < -10:
-                tubes.pop(0)
+                del tubes[0]
             speed = speed + 1
             if flap:
                 bird = bird - 1

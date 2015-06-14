@@ -1,8 +1,8 @@
 FlasciiBird
 ===========
 
-![In game screenshot](http://raw2.github.com/dos1/flasciibird/master/screen1.png)
-![Not as easy as it seems](http://raw2.github.com/dos1/flasciibird/master/screen2.png)
+![In game screenshot](https://raw.githubusercontent.com/dos1/flasciibird/master/screen1.png)
+![Not as easy as it seems](https://raw.githubusercontent.com/dos1/flasciibird/master/screen2.png)
 
 ncurses-based port of popular Flappy Bird game
 

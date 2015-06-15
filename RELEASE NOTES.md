@@ -1,5 +1,9 @@
 ## RELEASE NOTES
 
+### Version 0.0.4 - Jun 16, 2015
+
+- little code cleanup
+
 ### Version 0.0.3 - Feb 11, 2014
 
 - fix the case when the game would detect false collision of the bird with pipe

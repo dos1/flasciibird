@@ -1,5 +1,13 @@
 ## RELEASE NOTES
 
+### Version 0.0.5 - Jun 19, 2023
+
+- mouse support
+- better handling of keys producing escape characters
+- window resize
+- optional haptic feedback via feedbackd
+- improved tty recovery upon crash
+
 ### Version 0.0.4 - Jun 16, 2015
 
 - little code cleanup

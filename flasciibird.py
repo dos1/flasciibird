@@ -11,6 +11,20 @@ __license__     = "GPLv3+"
 
 import curses, time, random, os
 
+try:
+    import gi
+    gi.require_version('Lfb', '0.0')
+    from gi.repository import Lfb
+    Lfb.init('net.dosowisko.FlasciiBird')
+
+    def feedback(ev):
+        feedback = Lfb.Event.new(ev)
+        feedback.trigger_feedback_async(None, None, None)
+
+except:
+    def feedback(ev):
+        pass
+
 def main(myscreen):
     global score, tubes, bird, oldTime, updateTime, lastFlapTime, flapping, flap, speed
 
@@ -169,6 +183,7 @@ def main(myscreen):
         global score, tubes, bird, oldTime, updateTime, lastFlapTime, flapping, flap, speed
         curses.flash()
         curses.beep()
+        feedback('bell-terminal')
         draw(True)
         time.sleep(0.5)
         curses.flushinp()
@@ -221,6 +236,7 @@ def main(myscreen):
             createTube()
         if len(tubes) and tubes[0].getX() < (birdXPos - 11) and not tubes[0].getPassed():
             #curses.beep()
+            feedback('button-pressed')
             score = score + 1
             tubes[0].setPassed()
         if (newTime - updateTime) > 0.05:

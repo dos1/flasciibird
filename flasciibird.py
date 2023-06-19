@@ -4,17 +4,19 @@
 
 __author__      = "Sebastian Krzyszkowiak"
 __version__     = "0.0.4"
-__copyright__   = "Copyright 2014, Sebastian Krzyszkowiak <dos@dosowisko.net>"
+__copyright__   = "Copyright 2014, 2023 Sebastian Krzyszkowiak <dos@dosowisko.net>"
 __license__     = "GPLv3+"
 
 # So you're looking at the code anyway? OK then, but don't say I didn't warn you...
 
 import curses, time, random, os
 
-try:
-    myscreen = curses.initscr()
+def main(myscreen):
+    global score, tubes, bird, oldTime, updateTime, lastFlapTime, flapping, flap, speed
 
-    curses.start_color()
+    myscreen.keypad(False)
+    myscreen.nodelay(True)
+
     try:
         curses.use_default_colors()
         curses.init_pair(1, -1, -1)
@@ -25,10 +27,10 @@ try:
         curses.curs_set(0)
     except:
         pass
+
     curses.noecho()
     curses.raw()
-
-    myscreen.nodelay(1)
+    curses.mousemask(curses.BUTTON1_PRESSED)
 
     (maxy, maxx) = myscreen.getmaxyx()
 
@@ -42,11 +44,17 @@ try:
         def __init__(self, x, y):
             self.x = x
             self.y = y
-            self.box1 = curses.newwin(5, 12, 1, 20)
-            self.box2 = curses.newwin(maxy - (5 + 10), 12, 5 + 10, 20)
+            maxy, maxx = myscreen.getmaxyx()
+            if self.y >= maxy:
+                self.y = maxy - 2
+            if self.x >= maxx:
+                self.x = maxx - 2
+            self.box1 = curses.newwin(1, 1, 0, 0)
+            self.box2 = curses.newwin(1, 1, 0, 0)
             self.box1.bkgd(' ', curses.color_pair(2) | curses.A_REVERSE | curses.A_BOLD)
             self.box2.bkgd(' ', curses.color_pair(2) | curses.A_REVERSE | curses.A_BOLD)
             self.passed = False
+            self.draw()
 
         def getX(self):
             return self.x
@@ -55,12 +63,19 @@ try:
             return self.y
 
         def draw(self):
+            maxy, maxx = myscreen.getmaxyx()
             w = max(1, min(12, 13 - ((self.x + 12) - maxx + 1)) - max(0, -self.x + 1))
-            if self.x > -12:
-                self.box1.resize(self.y, w)
+            if self.y >= maxy:
+                self.y = maxy - 2
+            if self.x >= maxx:
+                self.x = maxx - 2
+            try:
+                self.box1.resize(min(maxy, self.y), w)
                 self.box1.mvwin(0, max(0, self.x - 1))
                 self.box2.resize(maxy - (self.y + 7), w)
                 self.box2.mvwin(self.y + 7, max(0, self.x - 1))
+            except:
+                pass
 
         def refresh(self):
             self.box1.noutrefresh()
@@ -84,6 +99,7 @@ try:
     def drawBird():
         #global bird
         #bird = tubes[0]['y'] + 4
+        maxy, maxx = myscreen.getmaxyx()
         if bird >= 0 and bird < maxy:
             myscreen.addstr(bird, birdXPos+5, "_", curses.color_pair(4))
         if bird >= -1 and bird < maxy - 1:
@@ -103,7 +119,25 @@ try:
 
     score = 0
 
+    def handleKey():
+        key = myscreen.getch()
+        while key == 27:
+            key = myscreen.getch()
+            if key == -1:
+                return -2
+            while key != -1:
+                key = myscreen.getch()
+                # ignore mouse button release
+                if key == ord('m'):
+                    nextkey = myscreen.getch()
+                    if nextkey == -1:
+                        return -1
+                    curses.ungetch(nextkey)
+            key = 0
+        return key
+
     def draw(dead = False):
+        maxy, maxx = myscreen.getmaxyx()
         myscreen.erase()
         #myscreen.border(1, 1, 0, 1, 1, 1, 1, 1)
         myscreen.addstr(0, maxx // 2 - 6, "FlasciiBird", curses.color_pair(1))
@@ -135,13 +169,15 @@ try:
         global score, tubes, bird, oldTime, updateTime, lastFlapTime, flapping, flap, speed
         curses.flash()
         curses.beep()
-        myscreen.nodelay(0)
         draw(True)
+        time.sleep(0.5)
+        curses.flushinp()
         key = myscreen.getch()
-        while key != 10 and key != 27:
-            key = myscreen.getch()
-        if key == 27:
-            return True
+        while key == -1:
+            key = handleKey()
+            if key == -2:
+                return True
+            time.sleep(0.01)
         score = 0
         tubes = []
         bird = maxy // 2 - 4
@@ -150,21 +186,30 @@ try:
         flapping = False
         flap = 0
         speed = 10.0
-        myscreen.nodelay(1)
         return False
 
     speed = 10.0
     flap = 0
 
-    key = 0
+    key = -1
     oldTime = updateTime = lastFlapTime = time.time()
 
     draw()
 
     flapping = False
+    termx, termy = 0, 0
 
-    while key != 27:
+    while True:
         newTime = time.time()
+
+        if curses.is_term_resized(maxy, maxx):
+            maxy, maxx = myscreen.getmaxyx()
+            myscreen.clear()
+            curses.resizeterm(maxy, maxx)
+            myscreen.refresh()
+            draw()
+            curses.flushinp()
+
         if key != -1:
             flapping = True
         if flapping and newTime - lastFlapTime > 0.25:
@@ -172,16 +217,16 @@ try:
             flap = 4
             lastFlapTime = newTime
             flapping = False
-        if tubes[-1].getX() < maxx - 1.2*maxy:
+        if len(tubes) and tubes[-1].getX() < maxx - 1.2*maxy:
             createTube()
-        if tubes[0].getX() < (birdXPos - 11) and not tubes[0].getPassed():
+        if len(tubes) and tubes[0].getX() < (birdXPos - 11) and not tubes[0].getPassed():
             #curses.beep()
             score = score + 1
             tubes[0].setPassed()
         if (newTime - updateTime) > 0.05:
             for tube in tubes:
                 tube.move()
-            if tubes[0].getX() < -10:
+            if len(tubes) > 1 and tubes[0].getX() < -10:
                 del tubes[0]
             speed = speed + 1
             if flap:
@@ -204,16 +249,18 @@ try:
         if bird > maxy - 4:
             if death():
                 break
-	
-        if birdXPos - 10 <= tubes[0].getX() <= birdXPos + 7:
+
+        if len(tubes) and birdXPos - 10 <= tubes[0].getX() <= birdXPos + 7:
             tol = max(0, tubes[0].getY() + 8 - (bird + 2))
             if bird + 1 < tubes[0].getY() or (bird + 4 >= tubes[0].getY() + 8 and birdXPos - 11 + tol < tubes[0].getX() <= birdXPos + 7 - tol):
                 if death():
                     break
 
-        key = myscreen.getch()
+        key = handleKey()
+        if key == -2:
+            break
+        time.sleep(0.01)
 
     curses.endwin()
-except:
-    os.system('stty sane')
-    raise
+
+curses.wrapper(main)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """flasciibird.py: ncurses-based port of Flappy Bird."""
 
